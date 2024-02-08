@@ -10,6 +10,7 @@ import Projects from "./pages/Projects";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import Layout from './Components/Layout';
+import PrivateRoute from './Components/PrivateRoute';
 
 function App() {
 
@@ -22,7 +23,9 @@ function App() {
         { path: "about", element: <About /> },
         { path: "signin", element: <SignIn /> },
         { path: "signup", element: <SignUp /> },
-        { path: "dashboard", element: <Dashboard /> },
+        { element: <PrivateRoute/>, children:[
+          { path: "dashboard", element: <Dashboard /> },
+        ] },
         { path: "projects", element: <Projects /> },
       ],
     },
