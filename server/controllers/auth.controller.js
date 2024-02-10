@@ -47,15 +47,14 @@ export const signUp = async(req, res,next) => {
 
 
 export const signIn = async(req,res,next) =>{
-  const {username , password } = req.body;
-  console.log("signIn ~ password:", password);
+  const {email , password } = req.body;
 
-  if(!username || !password){
+  if(!email || !password){
     return next(errorHandler(400,"All Fiellds Are Required"));
   }
 
   try {
-    const validUser = await User.findOne({ username});
+    const validUser = await User.findOne({ email});
 
     if(!validUser){
       return next(errorHandler(400, "User Not Found"));
@@ -64,7 +63,7 @@ export const signIn = async(req,res,next) =>{
     const validPassword = bcryptjs.compareSync(password, validUser.password);
 
     if(!validPassword){
-      return next(errorHandler(400,"Invalid Username Or Password"))
+      return next(errorHandler(400,"Invalid Email Or Password"))
     }
 
     const token = jwt.sign(
