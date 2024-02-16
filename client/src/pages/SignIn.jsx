@@ -61,11 +61,11 @@ const handleSubmit = async (e) => {
           <div className="flex-1">
             <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
               <div>
-                <Label value="Your Username" />
+                <Label value="Your Email" />
                 <TextInput
                   type="text"
-                  placeholder="Enter Username"
-                  id="username"
+                  placeholder="Enter Email"
+                  id="email"
                   onChange={handleChange}
                 />
               </div>

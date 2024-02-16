@@ -10,9 +10,17 @@ import {
 import { app } from "../firebase";
 import { CircularProgressbar } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
+import {
+  updateFailure,
+  updateStart,
+  updateSuccess,
+} from "../redux/user/userSlice";
 
 export default function DashProfile() {
   const { currentUser } = useSelector((state) => state.user);
+  // console.log("DashProfile ~ currentUser:", currentUser._id);
+
+  const dispatch = useDispatch();
 
   const [imageFile, setImageFile] = useState(null);
 
@@ -22,7 +30,13 @@ export default function DashProfile() {
   const [imageFileUploadError, setImageFileUploadError] = useState(null);
   const [imageFileUploading, setImageFileUploading] = useState(false);
 
+  const [updateUserSuccess, setUpdateUserSuccess] = useState(null);
+  const [updateUserErrror, setUpdateUserErrror] = useState(null);
+
   const filePickerRef = useRef();
+
+  const [formData, setFormData] = useState({});
+  // console.log("DashProfile ~ formData:", formData);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -49,8 +63,7 @@ export default function DashProfile() {
       request.resource.contentType.matches('image/.*')
     }
   }
-}
-    */
+}*/
 
     setImageFileUploading(true);
     setImageFileUploadError(null);
@@ -72,25 +85,69 @@ export default function DashProfile() {
         setImageFileUploadError(
           `Could not upload image (File must be less than 2MB)`
         );
-         setImageFileUploadProgress(null);
-         setImageFile(null);
-         setImageFileUrl(null);
-         setImageFileUploading(false);
+        setImageFileUploadProgress(null);
+        setImageFile(null);
+        setImageFileUrl(null);
+        setImageFileUploading(false);
       },
       () => {
         //get URL of Uploaded File
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
           setImageFileUrl(downloadURL);
+          setFormData({ ...formData, profilePicture: downloadURL });
+          setImageFileUploading(true);
         });
       }
     );
+  };
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+
+  const handleFormSubmit = async (e) => {
+    e.preventDefault(); //Defaultly When We Save Form The Form Will Submit with load to prevent that......
+    if (Object.keys(formData).length === 0) {
+      setUpdateUserErrror("No Changes Made");
+      return;
+    }
+    if (imageFileUploading) {
+      setUpdateUserErrror("Please Wait For Image To Upload");
+      return;
+    }
+    try {
+      dispatch(updateStart());
+      const res = await fetch(`/api/user/update/${currentUser._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        dispatch(updateFailure(data.message));
+        setUpdateUserErrror(data.message);
+      } else {
+        dispatch(updateSuccess(data));
+        setUpdateUserSuccess("User's Profile Updated Successfully");
+      }
+    } catch (error) {
+      dispatch(updateFailure(error.message));
+      setUpdateUserErrror(error.message);
+    }
   };
 
   return (
     <>
       <div className="max-w-lg mx-auto p-3 w-full">
         <h1 className="my-7 text-center font-semibold text-3xl">Profile</h1>
-        <form action="" className="flex flex-col gap-4">
+        <form
+          action=""
+          onSubmit={handleFormSubmit}
+          className="flex flex-col gap-4"
+        >
           <input
             type="file"
             accept="image/*" //  /* means any types of image
@@ -143,18 +200,20 @@ export default function DashProfile() {
             id="username"
             placeholder="Username"
             defaultValue={currentUser.username}
+            onChange={handleChange}
           />
           <TextInput
             type="text"
             id="email"
             placeholder="email"
             defaultValue={currentUser.email}
+            onChange={handleChange}
           />
           <TextInput
             type="text"
             id="password"
             placeholder="password"
-            // defaultValue={currentUser.pass}
+            onChange={handleChange}
           />
 
           <Button type="submit" gradientDuoTone={`purpleToBlue`} outline>
@@ -165,6 +224,16 @@ export default function DashProfile() {
           <span className="cursor-pointer">Delete Account</span>
           <span className="cursor-pointer">Sign Out</span>
         </div>
+        {updateUserSuccess && (
+          <Alert color="success" className="mt-5">
+            {updateUserSuccess}
+          </Alert>
+        )}
+        {updateUserErrror && (
+          <Alert color="failure" className="mt-5">
+            {updateUserErrror}
+          </Alert>
+        )}
       </div>
     </>
   );
