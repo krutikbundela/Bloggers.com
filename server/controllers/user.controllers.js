@@ -14,9 +14,9 @@ export const updateUser = async (req, res, next) => {
   }
 
   if (req.body.username) {
-    if (req.body.username.length < 7 || req.body.username.length > 20) {
+    if (req.body.username.length < 4 || req.body.username.length > 20) {
       return next(
-        errorHandler(400, "Username must be between 7 and 20 characters")
+        errorHandler(400, "Username must be between 4 and 20 characters")
       );
     }
     if (req.body.username.includes(" ")) {
@@ -57,7 +57,20 @@ export const deleteUser = async (req, res, next) => {
   }
   try {
     await User.findByIdAndDelete(req.params.userId);
-    res.status(200).json("User Has Been Deleted")
+    res.status(200).json("User Has Been Deleted");
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const signOutUser = async (req, res, next) => {
+  try {
+    res.cookie("access_token", null, {
+      expires: new Date(Date.now()),
+      httpOnly: true,
+    }).status(200)
+      .json("User has been Signed Out"); 
+    
   } catch (error) {
     next(error);
   }

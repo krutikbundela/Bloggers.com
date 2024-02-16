@@ -2,18 +2,43 @@ import { Sidebar } from "flowbite-react";
 import { HiArrowSmRight, HiUser } from "react-icons/hi";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import {
+  signInFailure,
+  signInStart,
+  signInSuccess,
+} from "../redux/user/userSlice";
+import { useDispatch } from "react-redux";
 
 export default function DashSidebar() {
-    const location = useLocation();
-    const [tab, setTab] = useState();
+  const location = useLocation();
+  const [tab, setTab] = useState();
 
-    useEffect(() => {
-      const urlParams = new URLSearchParams(location.search);
-      const tabFromUrl = urlParams.get("tab");
-      if (tabFromUrl) {
-        setTab(tabFromUrl);
+  const dispatch = useDispatch();
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const tabFromUrl = urlParams.get("tab");
+    if (tabFromUrl) {
+      setTab(tabFromUrl);
+    }
+  }, [location.search]);
+
+  const handleSignedOut = async () => {
+    try {
+      dispatch(signInStart());
+      const res = await fetch("/api/user/signout", {
+        method: "POST",
+      });
+      const data = await res.json();
+      console.log("handleSignedOut ~ data:", data);
+      if (!res.ok) {
+        dispatch(signInFailure(data.message));
+      } else {
+        dispatch(signInSuccess());
       }
-    }, [location.search]);
+    } catch (error) {
+      dispatch(signInFailure(error.message));
+    }
+  };
   return (
     <>
       <Sidebar className="w-full md:w-56">
@@ -25,7 +50,7 @@ export default function DashSidebar() {
                 icon={HiUser}
                 label={"User"}
                 labelColor="dark"
-                as='div'
+                as="div"
               >
                 Profile
               </Sidebar.Item>
@@ -35,6 +60,7 @@ export default function DashSidebar() {
               label={"User"}
               labelColor="dark"
               className="cursur-pointer"
+              onClick={handleSignedOut}
             >
               Sign Out
             </Sidebar.Item>

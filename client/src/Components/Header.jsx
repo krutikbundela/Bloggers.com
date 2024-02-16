@@ -4,12 +4,29 @@ import { AiOutlineSearch } from "react-icons/ai";
 import { FaMoon, FaSun } from "react-icons/fa";
 import { useSelector, useDispatch } from "react-redux";
 import { toggleTheme } from "../redux/theme/themeSlice";
+import { signInFailure, signInStart, signInSuccess } from "../redux/user/userSlice";
 const Header = () => {
   const activPath = useLocation().pathname;
   const dispatch = useDispatch();
   const { currentUser } = useSelector((state) => state.user);
   const { theme } = useSelector((state) => state.theme);
-  
+    const handleSignedOut = async () => {
+      try {
+        dispatch(signInStart());
+        const res = await fetch("/api/user/signout", {
+          method: "POST",
+        });
+        const data = await res.json();
+        console.log("handleSignedOut ~ data:", data);
+        if (!res.ok) {
+          dispatch(signInFailure(data.message));
+        } else {
+          dispatch(signInSuccess());
+        }
+      } catch (error) {
+        dispatch(signInFailure(error.message));
+      }
+    };
   return (
     <>
       <Navbar className="border-b-2">
@@ -50,7 +67,6 @@ const Header = () => {
                 <Avatar alt="user" img={currentUser.profilePicture} rounded />
               }
             >
-              
               <Dropdown.Header>
                 <span className="block text-sm">@{currentUser.username}</span>
                 <span className="block text-sm font-medium truncate">
@@ -61,7 +77,7 @@ const Header = () => {
                 <Dropdown.Item>Profile</Dropdown.Item>
               </Link>
               <Dropdown.Divider />
-              <Dropdown.Item>Sign Out</Dropdown.Item>
+              <Dropdown.Item onClick={handleSignedOut}>Sign Out</Dropdown.Item>
             </Dropdown>
           ) : (
             <Link to={"/signin"}>

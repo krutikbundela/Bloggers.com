@@ -18,6 +18,9 @@ import {
   deleteUserStart,
   deleteUserSuccess,
   deleteUserFailure,
+  signInStart,
+  signInFailure,
+  signInSuccess,
 } from "../redux/user/userSlice";
 
 export default function DashProfile() {
@@ -165,6 +168,24 @@ export default function DashProfile() {
     }
   };
 
+  const handleSignedOut = async () => {
+    try {
+      dispatch(signInStart());
+      const res = await fetch("/api/user/signout", {
+        method: "POST",
+      });
+      const data = await res.json();
+      console.log("handleSignedOut ~ data:", data);
+      if (!res.ok) {
+        dispatch(signInFailure(data.message));
+      } else {
+        dispatch(signInSuccess());
+      }
+    } catch (error) {
+      dispatch(signInFailure(error.message));
+    }
+  };
+
   return (
     <>
       <div className="max-w-lg mx-auto p-3 w-full">
@@ -250,7 +271,9 @@ export default function DashProfile() {
           <span className="cursor-pointer" onClick={() => setShowModel(true)}>
             Delete Account
           </span>
-          <span className="cursor-pointer">Sign Out</span>
+          <span className="cursor-pointer" onClick={handleSignedOut}>
+            Sign Out
+          </span>
         </div>
         {updateUserSuccess && (
           <Alert color="success" className="mt-5">
