@@ -21,6 +21,10 @@ const userSchema = new mongoose.Schema(
       default:
         "https://www.pngall.com/wp-content/uploads/12/Avatar-PNG-Images.png",
     },
+    isAdmin:{
+      type:Boolean,
+      default:false,
+    }
   },
   { timestamps: true }
 );
