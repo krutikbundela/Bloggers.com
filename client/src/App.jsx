@@ -11,6 +11,8 @@ import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import Layout from './Components/Layout';
 import PrivateRoute from './Components/PrivateRoute';
+import AdminPrivateRoute from './Components/AdminPrivateRoute';
+import CreatePost from './pages/CreatePost';
 
 function App() {
 
@@ -25,6 +27,9 @@ function App() {
         { path: "signup", element: <SignUp /> },
         { element: <PrivateRoute/>, children:[
           { path: "dashboard", element: <Dashboard /> },
+        ] },
+        { element: <AdminPrivateRoute/>, children:[
+          { path: "createpost", element: <CreatePost /> },
         ] },
         { path: "projects", element: <Projects /> },
       ],

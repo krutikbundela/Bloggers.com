@@ -1,4 +1,5 @@
 import { useSelector, useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
 import { Alert, Button, Modal, TextInput } from "flowbite-react";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -24,7 +25,7 @@ import {
 } from "../redux/user/userSlice";
 
 export default function DashProfile() {
-  const { currentUser, error } = useSelector((state) => state.user);
+  const { currentUser, error, loading } = useSelector((state) => state.user);
   // console.log("DashProfile ~ currentUser:", currentUser._id);
 
   const dispatch = useDispatch();
@@ -263,9 +264,25 @@ export default function DashProfile() {
             onChange={handleChange}
           />
 
-          <Button type="submit" gradientDuoTone={`purpleToBlue`} outline>
-            Update
+          <Button
+            type="submit"
+            gradientDuoTone={`purpleToBlue`}
+            outline
+            disabled={loading || imageFileUploading}
+          >
+           {loading ? "Loading...":" Update"}
           </Button>
+          {currentUser.isAdmin === true && (
+            <Link to={"/createpost"}>
+              <Button
+                type="button"
+                gradientDuoTone={"purpleToPink"}
+                className="w-full"
+              >
+                Create a Post
+              </Button>
+            </Link>
+          )}
         </form>
         <div className="text-red-500 flex justify-between mt-5">
           <span className="cursor-pointer" onClick={() => setShowModel(true)}>
